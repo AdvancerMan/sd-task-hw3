@@ -18,9 +18,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     private <R> R generateStatement(StatementMapper<R> statementMapper) {
-        try (Connection c = connectionProvider.getConnection();
-             Statement stmt = c.createStatement()) {
-            return statementMapper.mapStatement(stmt);
+        try (Connection connection = connectionProvider.getConnection();
+             Statement statement = connection.createStatement()) {
+            return statementMapper.mapStatement(statement);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -32,11 +32,9 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     private <R> R executeQuery(String sql, ResultSetMapper<R> resultMapper) {
         return generateStatement(statement -> {
-            ResultSet resultSet = statement.executeQuery(sql);
-            R result = resultMapper.mapResultSet(resultSet);
-
-            resultSet.close();
-            return result;
+            try (ResultSet resultSet = statement.executeQuery(sql)) {
+                return resultMapper.mapResultSet(resultSet);
+            }
         });
     }
 

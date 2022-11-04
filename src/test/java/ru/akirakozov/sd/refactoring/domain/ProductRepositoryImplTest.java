@@ -78,6 +78,16 @@ public class ProductRepositoryImplTest {
     }
 
     @Test
+    public void testNoMax() {
+        Assert.assertNull(productRepository.loadMaxByPrice());
+    }
+
+    @Test
+    public void testNoMin() {
+        Assert.assertNull(productRepository.loadMinByPrice());
+    }
+
+    @Test
     public void testSaveAndSum() {
         final long pricesSum = saveProducts()
                 .stream()

@@ -73,7 +73,7 @@ public class HtmlViewBuilderTest {
 
     @Test
     public void testBuildMaxProductView() {
-        htmlViewBuilder.buildMinProductView(resultWriter, new Product("name", 123));
+        htmlViewBuilder.buildMaxProductView(resultWriter, new Product("name", 123));
         assertResultIgnoreLineBreaks(
                 "<html><body>" +
                         "<h1>Product with max price: </h1>" +

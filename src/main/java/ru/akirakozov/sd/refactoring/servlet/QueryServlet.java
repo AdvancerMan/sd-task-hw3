@@ -29,33 +29,21 @@ public class QueryServlet extends HttpServlet {
         if ("max".equals(command)) {
             final Product product = productRepository.loadMaxByPrice();
 
-            response.getWriter().println("<html><body>");
-            response.getWriter().println("<h1>Product with max price: </h1>");
-            response.getWriter().println(product.getName() + "\t" + product.getPrice() + "</br>");
-            response.getWriter().println("</body></html>");
+            viewBuilder.buildMaxProductView(response.getWriter(), product);
         } else if ("min".equals(command)) {
             final Product product = productRepository.loadMinByPrice();
 
-            response.getWriter().println("<html><body>");
-            response.getWriter().println("<h1>Product with min price: </h1>");
-            response.getWriter().println(product.getName() + "\t" + product.getPrice() + "</br>");
-            response.getWriter().println("</body></html>");
+            viewBuilder.buildMinProductView(response.getWriter(), product);
         } else if ("sum".equals(command)) {
             final long priceSum = productRepository.loadPriceSum();
 
-            response.getWriter().println("<html><body>");
-            response.getWriter().println("Summary price: ");
-            response.getWriter().println(priceSum);
-            response.getWriter().println("</body></html>");
+            viewBuilder.buildPricesSumView(response.getWriter(), priceSum);
         } else if ("count".equals(command)) {
             final int productsCount = productRepository.loadProductsCount();
 
-            response.getWriter().println("<html><body>");
-            response.getWriter().println("Number of products: ");
-            response.getWriter().println(productsCount);
-            response.getWriter().println("</body></html>");
+            viewBuilder.buildProductsCountView(response.getWriter(), productsCount);
         } else {
-            response.getWriter().println("Unknown command: " + command);
+            viewBuilder.buildInvalidCommandView(response.getWriter(), command);
         }
 
         response.setContentType("text/html");

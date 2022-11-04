@@ -28,9 +28,9 @@ public class AddProductServlet extends HttpServlet {
         long price = Long.parseLong(request.getParameter("price"));
 
         productRepository.saveProduct(new Product(name, price));
+        viewBuilder.buildDefaultSuccessView(response.getWriter());
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("OK");
     }
 }

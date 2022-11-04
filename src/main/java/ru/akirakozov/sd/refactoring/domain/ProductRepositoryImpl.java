@@ -17,31 +17,31 @@ public class ProductRepositoryImpl implements ProductRepository {
         this.connectionProvider = connectionProvider;
     }
 
-    private <R> R generateStatement(StatementMapper<R> statementMapper) {
-        try (Connection connection = connectionProvider.getConnection();
-             Statement statement = connection.createStatement()) {
+    private <R> R generateStatement(final StatementMapper<R> statementMapper) {
+        try (final Connection connection = connectionProvider.getConnection();
+             final Statement statement = connection.createStatement()) {
             return statementMapper.mapStatement(statement);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void executeUpdate(String sql) {
+    private void executeUpdate(final String sql) {
         generateStatement(statement -> statement.executeUpdate(sql));
     }
 
-    private <R> R executeQuery(String sql, ResultSetMapper<R> resultMapper) {
+    private <R> R executeQuery(final String sql, final ResultSetMapper<R> resultMapper) {
         return generateStatement(statement -> {
-            try (ResultSet resultSet = statement.executeQuery(sql)) {
+            try (final ResultSet resultSet = statement.executeQuery(sql)) {
                 return resultMapper.mapResultSet(resultSet);
             }
         });
     }
 
-    private static Product getProduct(ResultSet resultSet) throws SQLException {
+    private static Product getProduct(final ResultSet resultSet) throws SQLException {
         if (resultSet.next()) {
-            String name = resultSet.getString("name");
-            int price = resultSet.getInt("price");
+            final String name = resultSet.getString("name");
+            final int price = resultSet.getInt("price");
             return new Product(name, price);
         }
         return null;

@@ -7,27 +7,27 @@ import java.util.List;
 
 public class HtmlViewBuilder implements ViewBuilder {
     @Override
-    public void buildDefaultSuccessView(PrintWriter printWriter) {
+    public void buildDefaultSuccessView(final PrintWriter printWriter) {
         printWriter.println("OK");
     }
 
     @Override
-    public void buildInvalidCommandView(PrintWriter printWriter, String command) {
+    public void buildInvalidCommandView(final PrintWriter printWriter, final String command) {
         printWriter.println("Unknown command: " + command);
     }
 
-    private void buildDocument(PrintWriter printWriter, Runnable documentContentBuilder) {
+    private void buildDocument(final PrintWriter printWriter, final Runnable documentContentBuilder) {
         printWriter.println("<html><body>");
         documentContentBuilder.run();
         printWriter.println("</body></html>");
     }
 
-    private void buildProduct(PrintWriter printWriter, Product product) {
+    private void buildProduct(final PrintWriter printWriter, final Product product) {
         printWriter.println(product.getName() + "\t" + product.getPrice() + "</br>");
     }
 
     @Override
-    public void buildAllProductsView(PrintWriter printWriter, List<Product> products) {
+    public void buildAllProductsView(final PrintWriter printWriter, final List<Product> products) {
         buildDocument(printWriter, () -> {
             for (final Product product : products) {
                 buildProduct(printWriter, product);
@@ -36,7 +36,7 @@ public class HtmlViewBuilder implements ViewBuilder {
     }
 
     @Override
-    public void buildMinProductView(PrintWriter printWriter, Product minProduct) {
+    public void buildMinProductView(final PrintWriter printWriter, final Product minProduct) {
         buildDocument(printWriter, () -> {
             printWriter.println("<h1>Product with min price: </h1>");
             buildProduct(printWriter, minProduct);
@@ -44,7 +44,7 @@ public class HtmlViewBuilder implements ViewBuilder {
     }
 
     @Override
-    public void buildMaxProductView(PrintWriter printWriter, Product maxProduct) {
+    public void buildMaxProductView(final PrintWriter printWriter, final Product maxProduct) {
         buildDocument(printWriter, () -> {
             printWriter.println("<h1>Product with max price: </h1>");
             buildProduct(printWriter, maxProduct);
@@ -52,7 +52,7 @@ public class HtmlViewBuilder implements ViewBuilder {
     }
 
     @Override
-    public void buildPricesSumView(PrintWriter printWriter, long priceSum) {
+    public void buildPricesSumView(final PrintWriter printWriter, final long priceSum) {
         buildDocument(printWriter, () -> {
             printWriter.println("Summary price: ");
             printWriter.println(priceSum);
@@ -60,7 +60,7 @@ public class HtmlViewBuilder implements ViewBuilder {
     }
 
     @Override
-    public void buildProductsCountView(PrintWriter printWriter, int productsCount) {
+    public void buildProductsCountView(final PrintWriter printWriter, final int productsCount) {
         buildDocument(printWriter, () -> {
             printWriter.println("Number of products: ");
             printWriter.println(productsCount);

@@ -23,9 +23,9 @@ public class AddProductServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String name = request.getParameter("name");
-        long price = Long.parseLong(request.getParameter("price"));
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        final String name = request.getParameter("name");
+        final long price = Long.parseLong(request.getParameter("price"));
 
         productRepository.saveProduct(new Product(name, price));
         viewBuilder.buildDefaultSuccessView(response.getWriter());

@@ -18,13 +18,13 @@ public class GetProductsServlet extends HttpServlet {
     private final ProductRepository productRepository;
     private final ViewBuilder viewBuilder;
 
-    public GetProductsServlet(ProductRepository productRepository, final ViewBuilder viewBuilder) {
+    public GetProductsServlet(final ProductRepository productRepository, final ViewBuilder viewBuilder) {
         this.productRepository = productRepository;
         this.viewBuilder = viewBuilder;
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         final List<Product> products = productRepository.loadAll();
         viewBuilder.buildAllProductsView(response.getWriter(), products);
 

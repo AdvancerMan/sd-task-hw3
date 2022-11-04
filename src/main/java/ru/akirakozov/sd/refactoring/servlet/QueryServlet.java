@@ -23,8 +23,8 @@ public class QueryServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String command = request.getParameter("command");
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        final String command = request.getParameter("command");
 
         if ("max".equals(command)) {
             final Product product = productRepository.loadMaxByPrice();

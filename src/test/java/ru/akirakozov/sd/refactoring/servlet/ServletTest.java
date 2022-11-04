@@ -43,6 +43,7 @@ public abstract class ServletTest {
                 .getWriter();
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected void expectContentType(final String contentType) {
         Mockito.doAnswer(invocation -> {
                     Assert.assertEquals(contentType, invocation.getArguments()[0]);
@@ -52,6 +53,7 @@ public abstract class ServletTest {
                 .setContentType(Mockito.anyString());
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected void expectStatus(final int statusCode) {
         Mockito.doAnswer(invocation -> {
                     Assert.assertEquals(statusCode, invocation.getArguments()[0]);

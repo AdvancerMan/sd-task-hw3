@@ -21,11 +21,11 @@ public class Product {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (!(o instanceof Product)) return false;
 
-        Product product = (Product) o;
+        final Product product = (Product) o;
 
         if (price != product.price) return false;
         return Objects.equals(name, product.name);

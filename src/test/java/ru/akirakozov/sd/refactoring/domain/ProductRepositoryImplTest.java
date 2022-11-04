@@ -18,6 +18,7 @@ public class ProductRepositoryImplTest {
     @Before
     public void init() throws IOException {
         productRepository = new ProductRepositoryImpl(new StubConnectionProvider());
+        productRepository.createProductTable();
     }
 
     private List<Product> saveProducts() {
@@ -41,7 +42,10 @@ public class ProductRepositoryImplTest {
         products.add(product2);
         products.add(product3);
 
-        return products.stream().sorted().collect(Collectors.toList());
+        return products
+                .stream()
+                .sorted(Comparator.comparingLong(Product::getPrice))
+                .collect(Collectors.toList());
     }
 
     @Test
@@ -50,7 +54,7 @@ public class ProductRepositoryImplTest {
         final List<Product> actual = productRepository
                 .loadAll()
                 .stream()
-                .sorted()
+                .sorted(Comparator.comparingLong(Product::getPrice))
                 .collect(Collectors.toList());
         Assert.assertEquals(expected, actual);
     }
@@ -59,7 +63,7 @@ public class ProductRepositoryImplTest {
     public void testSaveAndMax() {
         final Product maxProduct = saveProducts()
                 .stream()
-                .max(Comparator.comparingInt(Product::getPrice))
+                .max(Comparator.comparingLong(Product::getPrice))
                 .orElseThrow(RuntimeException::new);
         Assert.assertEquals(maxProduct, productRepository.loadMaxByPrice());
     }
@@ -68,16 +72,16 @@ public class ProductRepositoryImplTest {
     public void testSaveAndMin() {
         final Product minProduct = saveProducts()
                 .stream()
-                .min(Comparator.comparingInt(Product::getPrice))
+                .min(Comparator.comparingLong(Product::getPrice))
                 .orElseThrow(RuntimeException::new);
         Assert.assertEquals(minProduct, productRepository.loadMinByPrice());
     }
 
     @Test
     public void testSaveAndSum() {
-        final int pricesSum = saveProducts()
+        final long pricesSum = saveProducts()
                 .stream()
-                .mapToInt(Product::getPrice)
+                .mapToLong(Product::getPrice)
                 .sum();
         Assert.assertEquals(pricesSum, productRepository.loadPriceSum());
     }

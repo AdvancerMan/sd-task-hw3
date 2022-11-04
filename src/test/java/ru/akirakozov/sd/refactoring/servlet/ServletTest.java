@@ -37,6 +37,7 @@ public abstract class ServletTest {
                 .when(httpServletRequest)
                 .getParameter(Mockito.anyString());
 
+        responseWriter = new StringWriter();
         Mockito.doReturn(new PrintWriter(responseWriter))
                 .when(httpServletResponse)
                 .getWriter();

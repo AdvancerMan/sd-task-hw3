@@ -38,6 +38,12 @@ public class HtmlViewBuilderTest {
     }
 
     @Test
+    public void testBuildInvalidCommandView() {
+        htmlViewBuilder.buildInvalidCommandView(resultWriter, "asd");
+        assertResultIgnoreLineBreaks("Unknown command: asd");
+    }
+
+    @Test
     public void testBuildAllProductsView() {
         final List<Product> products = new ArrayList<>();
         products.add(new Product("name1", 1));

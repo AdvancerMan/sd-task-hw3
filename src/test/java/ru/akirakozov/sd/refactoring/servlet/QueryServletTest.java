@@ -7,6 +7,8 @@ import ru.akirakozov.sd.refactoring.domain.ProductRepository;
 import ru.akirakozov.sd.refactoring.domain.ProductRepositoryImpl;
 import ru.akirakozov.sd.refactoring.domain.StubConnectionProvider;
 import ru.akirakozov.sd.refactoring.domain.model.Product;
+import ru.akirakozov.sd.refactoring.view.HtmlViewBuilder;
+import ru.akirakozov.sd.refactoring.view.ViewBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -14,17 +16,22 @@ import java.util.Locale;
 
 public class QueryServletTest extends ServletTest {
 
+    private QueryServlet servlet;
+
     @Before
-    public void init() throws IOException {
+    public void initQueryServletTest() throws IOException {
         final ProductRepository productRepository = new ProductRepositoryImpl(new StubConnectionProvider());
+        productRepository.createProductTable();
         productRepository.saveProduct(new Product("name", 123));
         productRepository.saveProduct(new Product("name2", 321));
+
+        final ViewBuilder viewBuilder = new HtmlViewBuilder();
+
+        servlet = new QueryServlet(productRepository, viewBuilder);
     }
 
     @Test
     public void testDoGetUnknown() throws IOException {
-        final QueryServlet servlet = new QueryServlet();
-
         parameters.put("command", "unknown");
 
         expectContentType("text/html");
@@ -35,8 +42,6 @@ public class QueryServletTest extends ServletTest {
 
     @Test
     public void testDoGetMin() throws IOException {
-        final QueryServlet servlet = new QueryServlet();
-
         parameters.put("command", "min");
 
         expectContentType("text/html");
@@ -50,8 +55,6 @@ public class QueryServletTest extends ServletTest {
 
     @Test
     public void testDoGetMax() throws IOException {
-        final QueryServlet servlet = new QueryServlet();
-
         parameters.put("command", "max");
 
         expectContentType("text/html");
@@ -65,8 +68,6 @@ public class QueryServletTest extends ServletTest {
 
     @Test
     public void testDoGetCount() throws IOException {
-        final QueryServlet servlet = new QueryServlet();
-
         parameters.put("command", "count");
 
         expectContentType("text/html");
@@ -79,8 +80,6 @@ public class QueryServletTest extends ServletTest {
 
     @Test
     public void testDoGetSum() throws IOException {
-        final QueryServlet servlet = new QueryServlet();
-
         parameters.put("command", "sum");
 
         expectContentType("text/html");

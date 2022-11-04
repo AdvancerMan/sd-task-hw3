@@ -4,6 +4,7 @@ import ru.akirakozov.sd.refactoring.domain.model.Product;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,150 +17,107 @@ public class ProductRepositoryImpl implements ProductRepository {
         this.connectionProvider = connectionProvider;
     }
 
-    @Override
-    public void createProductTable() {
-        try (Connection c = connectionProvider.getConnection()) {
-            String sql = "CREATE TABLE IF NOT EXISTS PRODUCT" +
-                    "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-                    " NAME           TEXT    NOT NULL, " +
-                    " PRICE          INT     NOT NULL)";
-            Statement stmt = c.createStatement();
-
-            stmt.executeUpdate(sql);
-            stmt.close();
+    private <R> R generateStatement(StatementMapper<R> statementMapper) {
+        try (Connection c = connectionProvider.getConnection();
+             Statement stmt = c.createStatement()) {
+            return statementMapper.mapStatement(stmt);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void executeUpdate(String sql) {
+        generateStatement(statement -> statement.executeUpdate(sql));
+    }
+
+    private <R> R executeQuery(String sql, ResultSetMapper<R> resultMapper) {
+        return generateStatement(statement -> {
+            ResultSet resultSet = statement.executeQuery(sql);
+            R result = resultMapper.mapResultSet(resultSet);
+
+            resultSet.close();
+            return result;
+        });
+    }
+
+    private static Product getProduct(ResultSet resultSet) throws SQLException {
+        if (resultSet.next()) {
+            String name = resultSet.getString("name");
+            int price = resultSet.getInt("price");
+            return new Product(name, price);
+        }
+        return null;
+    }
+
+    @Override
+    public void createProductTable() {
+        executeUpdate("CREATE TABLE IF NOT EXISTS PRODUCT" +
+                "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+                " NAME           TEXT    NOT NULL, " +
+                " PRICE          INT     NOT NULL)");
     }
 
     @Override
     public void saveProduct(final Product product) {
-        try {
-            try (Connection c = connectionProvider.getConnection()) {
-                String sql = "INSERT INTO PRODUCT " +
-                        "(NAME, PRICE) VALUES (\"" + product.getName() + "\"," + product.getPrice() + ")";
-                Statement stmt = c.createStatement();
-                stmt.executeUpdate(sql);
-                stmt.close();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        executeUpdate("INSERT INTO PRODUCT " +
+                "(NAME, PRICE) VALUES (\"" +
+                product.getName() +
+                "\"," +
+                product.getPrice() +
+                ")");
     }
 
     @Override
     public List<Product> loadAll() {
-        final List<Product> result = new ArrayList<>();
-        try {
-            try (Connection c = connectionProvider.getConnection()) {
-                Statement stmt = c.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT");
+        return executeQuery("SELECT * FROM PRODUCT", resultSet -> {
+            final List<Product> result = new ArrayList<>();
 
-                while (rs.next()) {
-                    String  name = rs.getString("name");
-                    int price  = rs.getInt("price");
-                    result.add(new Product(name, price));
-                }
-
-                rs.close();
-                stmt.close();
+            Product product = getProduct(resultSet);
+            while (product != null) {
+                result.add(product);
+                product = getProduct(resultSet);
             }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override
     public Product loadMaxByPrice() {
-        Product result = null;
-        try {
-            try (Connection c = connectionProvider.getConnection()) {
-                Statement stmt = c.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1");
-
-                while (rs.next()) {
-                    String  name = rs.getString("name");
-                    int price  = rs.getInt("price");
-                    result = new Product(name, price);
-                }
-
-                rs.close();
-                stmt.close();
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return result;
+        return executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1", ProductRepositoryImpl::getProduct);
     }
 
     @Override
     public Product loadMinByPrice() {
-        Product result = null;
-        try {
-            try (Connection c = connectionProvider.getConnection()) {
-                Statement stmt = c.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1");
-
-                while (rs.next()) {
-                    String  name = rs.getString("name");
-                    int price  = rs.getInt("price");
-                    result = new Product(name, price);
-                }
-
-                rs.close();
-                stmt.close();
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return result;
+        return executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1", ProductRepositoryImpl::getProduct);
     }
 
     @Override
     public long loadPriceSum() {
-        long result = 0;
-        try {
-            try (Connection c = connectionProvider.getConnection()) {
-                Statement stmt = c.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT SUM(price) FROM PRODUCT");
-
-                if (rs.next()) {
-                    result = rs.getInt(1);
-                }
-
-                rs.close();
-                stmt.close();
+        return executeQuery("SELECT SUM(price) FROM PRODUCT", resultSet -> {
+            if (resultSet.next()) {
+                return resultSet.getLong(1);
             }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return result;
+            return null;
+        });
     }
 
     @Override
     public int loadProductsCount() {
-        int result = 0;
-        try {
-            try (Connection c = connectionProvider.getConnection()) {
-                Statement stmt = c.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM PRODUCT");
-
-                if (rs.next()) {
-                    result = rs.getInt(1);
-                }
-
-                rs.close();
-                stmt.close();
+        return executeQuery("SELECT COUNT(*) FROM PRODUCT", resultSet -> {
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
             }
+            return null;
+        });
+    }
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return result;
+    @FunctionalInterface
+    private interface StatementMapper<R> {
+        R mapStatement(Statement statement) throws SQLException;
+    }
+
+    @FunctionalInterface
+    private interface ResultSetMapper<R> {
+        R mapResultSet(ResultSet resultSet) throws SQLException;
     }
 }
